@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO -->
+    <title>Tekst Formatter - Konverter tekst gratis | TekstFormatter.dk</title>
+    <meta name="description" content="Gratis dansk tekst formatter. Konverter til STORE BOGSTAVER, smaa bogstaver, Title Case, slug, camelCase og mere. Taeller ord og tegn.">
+    <meta name="keywords" content="tekst formatter, konverter tekst, store bogstaver, smaa bogstaver, title case, slug generator, ord taeller, tekst vaerktoej">
+    <meta name="author" content="Mahope.dk">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://tekst.holstjensen.eu">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tekst.holstjensen.eu">
+    <meta property="og:title" content="Tekst Formatter - Konverter tekst gratis">
+    <meta property="og:description" content="Konverter tekst til forskellige formater. STORE BOGSTAVER, smaa bogstaver, Title Case og mere.">
+    <meta property="og:locale" content="da_DK">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔤</text></svg>">
+
+    <style>
+        :root {
+            --bg: #f0fdf4;
+            --surface: #ffffff;
+            --border: #bbf7d0;
+            --text: #14532d;
+            --muted: #166534;
+            --accent: #22c55e;
+            --accent-hover: #16a34a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 2px solid var(--border);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Textarea */
+        .text-area {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .text-area h3 {
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats {
+            font-size: 0.875rem;
+            color: var(--muted);
+            font-weight: normal;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+
+        /* Buttons grid */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.875rem 1rem;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            margin-right: 0.5rem;
+        }
+
+        /* Action buttons */
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 0.875rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            🔤 Tekst<span>Formatter</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="text-area">
+            <h3>
+                <span>📝 Din tekst</span>
+                <span class="stats" id="stats">0 ord | 0 tegn | 0 linjer</span>
+            </h3>
+            <textarea id="inputText" placeholder="Indsaet eller skriv din tekst her..." oninput="updateStats()">Dette er en eksempel tekst.
+Du kan konvertere den til forskellige formater!
+
+Proev knapperne nedenfor.</textarea>
+        </div>
+
+        <div class="buttons">
+            <button class="btn" onclick="transform('upper')"><span class="btn-icon">🔠</span> STORE BOGSTAVER</button>
+            <button class="btn" onclick="transform('lower')"><span class="btn-icon">🔡</span> smaa bogstaver</button>
+            <button class="btn" onclick="transform('title')"><span class="btn-icon">📰</span> Title Case</button>
+            <button class="btn" onclick="transform('sentence')"><span class="btn-icon">💬</span> Sentence case</button>
+            <button class="btn" onclick="transform('capitalize')"><span class="btn-icon">🔤</span> Capitalize Words</button>
+            <button class="btn" onclick="transform('inverse')"><span class="btn-icon">🔄</span> iNVERSE cASE</button>
+            <button class="btn" onclick="transform('alternating')"><span class="btn-icon">🎭</span> aLtErNaTiNg</button>
+            <button class="btn" onclick="transform('slug')"><span class="btn-icon">🔗</span> url-slug</button>
+            <button class="btn" onclick="transform('camel')"><span class="btn-icon">🐫</span> camelCase</button>
+            <button class="btn" onclick="transform('snake')"><span class="btn-icon">🐍</span> snake_case</button>
+            <button class="btn" onclick="transform('kebab')"><span class="btn-icon">🍢</span> kebab-case</button>
+            <button class="btn" onclick="transform('pascal')"><span class="btn-icon">📦</span> PascalCase</button>
+            <button class="btn" onclick="transform('reverse')"><span class="btn-icon">⏪</span> Reverse Text</button>
+            <button class="btn" onclick="transform('reverseWords')"><span class="btn-icon">↩️</span> Reverse Words</button>
+            <button class="btn" onclick="transform('removeDuplicateLines')"><span class="btn-icon">🧹</span> Remove Duplicates</button>
+            <button class="btn" onclick="transform('removeExtraSpaces')"><span class="btn-icon">✨</span> Trim Spaces</button>
+            <button class="btn" onclick="transform('sortLines')"><span class="btn-icon">📊</span> Sort Lines A-Z</button>
+            <button class="btn" onclick="transform('shuffleLines')"><span class="btn-icon">🎲</span> Shuffle Lines</button>
+            <button class="btn" onclick="transform('numberLines')"><span class="btn-icon">🔢</span> Number Lines</button>
+            <button class="btn" onclick="transform('addPrefix')"><span class="btn-icon">➡️</span> Add Prefix</button>
+        </div>
+
+        <div class="actions">
+            <button class="btn-action" onclick="copyText()">📋 Kopier tekst</button>
+            <button class="btn-action btn-secondary" onclick="clearText()">🗑️ Ryd</button>
+            <button class="btn-action btn-secondary" onclick="undoTransform()">↩️ Fortryd</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background:#14532d;color:#bbf7d0;padding:2rem 1rem;margin-top:2rem;">
+        <div style="max-width:900px;margin:0 auto;">
+            <h3 style="color:white;font-size:1rem;margin-bottom:1rem;">🛠️ Andre gratis vaerktoejer</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.5rem;margin-bottom:1.5rem;">
+                <a href="https://gratisfaktura.dk" style="color:#bbf7d0;text-decoration:none;font-size:0.875rem;">📄 Faktura Generator</a>
+                <a href="https://kodeord.dk" style="color:#bbf7d0;text-decoration:none;font-size:0.875rem;">🔐 Kodeord Generator</a>
+                <a href="https://markdown.holstjensen.eu" style="color:#bbf7d0;text-decoration:none;font-size:0.875rem;">📝 Markdown Editor</a>
+                <a href="https://lorem.holstjensen.eu" style="color:#bbf7d0;text-decoration:none;font-size:0.875rem;">📜 Lorem Ipsum</a>
+                <a href="https://dato.holstjensen.eu" style="color:#bbf7d0;text-decoration:none;font-size:0.875rem;">📅 Dato Beregner</a>
+                <a href="https://meme.holstjensen.eu" style="color:#bbf7d0;text-decoration:none;font-size:0.875rem;">😂 Meme Generator</a>
+                <a href="https://citater.holstjensen.eu" style="color:#bbf7d0;text-decoration:none;font-size:0.875rem;">💬 Citater</a>
+                <a href="https://qr.holstjensen.eu" style="color:#bbf7d0;text-decoration:none;font-size:0.875rem;">📱 QR Generator</a>
+            </div>
+            <div style="border-top:1px solid #166534;padding-top:1rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;font-size:0.75rem;">
+                <p>&copy; 2025 <a href="https://mahope.dk" style="color:#bbf7d0;">Mahope.dk</a></p>
+                <a href="https://privacy.holstjensen.eu" style="color:#bbf7d0;">Privatlivspolitik</a>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const textarea = document.getElementById('inputText');
+        let history = [textarea.value];
+
+        function updateStats() {
+            const text = textarea.value;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const chars = text.length;
+            const lines = text.split('\n').length;
+            document.getElementById('stats').textContent = `${words} ord | ${chars} tegn | ${lines} linjer`;
+        }
+
+        function saveHistory() {
+            history.push(textarea.value);
+            if (history.length > 20) history.shift();
+        }
+
+        function transform(type) {
+            saveHistory();
+            const text = textarea.value;
+            let result = text;
+
+            switch(type) {
+                case 'upper':
+                    result = text.toUpperCase();
+                    break;
+                case 'lower':
+                    result = text.toLowerCase();
+                    break;
+                case 'title':
+                    result = text.toLowerCase().replace(/(?:^|\s|["'([{])\S/g, c => c.toUpperCase());
+                    break;
+                case 'sentence':
+                    result = text.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
+                    break;
+                case 'capitalize':
+                    result = text.replace(/\b\w/g, c => c.toUpperCase());
+                    break;
+                case 'inverse':
+                    result = text.split('').map(c => 
+                        c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()
+                    ).join('');
+                    break;
+                case 'alternating':
+                    result = text.split('').map((c, i) => 
+                        i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()
+                    ).join('');
+                    break;
+                case 'slug':
+                    result = text.toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-|-$/g, '');
+                    break;
+                case 'camel':
+                    result = text.toLowerCase()
+                        .replace(/[^a-z0-9\s]/g, '')
+                        .split(/\s+/)
+                        .map((w, i) => i === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1))
+                        .join('');
+                    break;
+                case 'snake':
+                    result = text.toLowerCase()
+                        .replace(/[^a-z0-9\s]/g, '')
+                        .replace(/\s+/g, '_');
+                    break;
+                case 'kebab':
+                    result = text.toLowerCase()
+                        .replace(/[^a-z0-9\s]/g, '')
+                        .replace(/\s+/g, '-');
+                    break;
+                case 'pascal':
+                    result = text.toLowerCase()
+                        .replace(/[^a-z0-9\s]/g, '')
+                        .split(/\s+/)
+                        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                        .join('');
+                    break;
+                case 'reverse':
+                    result = text.split('').reverse().join('');
+                    break;
+                case 'reverseWords':
+                    result = text.split(/\s+/).reverse().join(' ');
+                    break;
+                case 'removeDuplicateLines':
+                    result = [...new Set(text.split('\n'))].join('\n');
+                    break;
+                case 'removeExtraSpaces':
+                    result = text.replace(/  +/g, ' ').replace(/^\s+|\s+$/gm, '');
+                    break;
+                case 'sortLines':
+                    result = text.split('\n').sort((a, b) => a.localeCompare(b, 'da')).join('\n');
+                    break;
+                case 'shuffleLines':
+                    const lines = text.split('\n');
+                    for (let i = lines.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [lines[i], lines[j]] = [lines[j], lines[i]];
+                    }
+                    result = lines.join('\n');
+                    break;
+                case 'numberLines':
+                    result = text.split('\n').map((line, i) => `${i + 1}. ${line}`).join('\n');
+                    break;
+                case 'addPrefix':
+                    const prefix = prompt('Indtast prefix:', '- ');
+                    if (prefix !== null) {
+                        result = text.split('\n').map(line => prefix + line).join('\n');
+                    }
+                    break;
+            }
+
+            textarea.value = result;
+            updateStats();
+            showToast('Tekst konverteret! ✨');
+        }
+
+        function copyText() {
+            navigator.clipboard.writeText(textarea.value);
+            showToast('Kopieret til udklipsholder! 📋');
+        }
+
+        function clearText() {
+            saveHistory();
+            textarea.value = '';
+            updateStats();
+        }
+
+        function undoTransform() {
+            if (history.length > 1) {
+                history.pop();
+                textarea.value = history[history.length - 1];
+                updateStats();
+                showToast('Fortrudt! ↩️');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Initialize
+        updateStats();
+    </script>
+</body>
+</html>
